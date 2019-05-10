@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>SpringBoot RabbitMQ Demo</title>
+
+        <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.0.0/css/bootstrap.min.css}"/>
+        <style>
+            body {
+                padding-top: 100px;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div class="container">
+            <h2>Spring Boot + RabbitMQ Demo</h2>
+            <div class="alert alert-success" role="alert" th:if="${ message != null}" th:text="${message}">
+
+            </div>
+            <div>
+                <form th:action="@{/sendOrder}" method="post">
+                    <div class="form-group">
+                        <label for="productId">ProductId:</label>
+                        <input class="form-control" id="productId" name="productId" />
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Product Description:</label>
+                        <input class="form-control" id="productDescription" name="productDescription" />
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input class="form-control" id="amount" name="amount" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </body>
+    <script th:src="@{/webjars/jquery/3.0.0/jquery.min.js}"></script>
+    <script th:src="@{/webjars/popper.js/1.11.1/dist/umd/popper.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/4.0.0/js/bootstrap.min.js}"></script>
+</html>
