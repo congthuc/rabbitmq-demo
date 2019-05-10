@@ -2,7 +2,6 @@ package com.congthuc.rabbitmqdemo.sender;
 
 import com.congthuc.rabbitmqdemo.config.RabbitConfig;
 import com.congthuc.rabbitmqdemo.dto.Letter;
-import com.congthuc.rabbitmqdemo.dto.Order;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
@@ -37,7 +36,9 @@ public class LetterMessageSender {
                     .withBody(orderJson.getBytes())
                     .setContentType(MessageProperties.CONTENT_TYPE_JSON)
                     .build();
-            this.rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_LETTERS, message);
+
+            this.rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_LETTERS, RabbitConfig.QUEUE_LETTERS_ROUTE_KEY,
+                    message);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
