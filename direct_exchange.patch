@@ -1,0 +1,111 @@
+Index: src/main/java/com/congthuc/rabbitmqdemo/comsumer/LetterMessageListener.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/congthuc/rabbitmqdemo/comsumer/LetterMessageListener.java	(revision ba2c07d6a7f7f4e185f8e13b0a66440adfc3594c)
++++ src/main/java/com/congthuc/rabbitmqdemo/comsumer/LetterMessageListener.java	(date 1557487050452)
+@@ -2,7 +2,6 @@
+ 
+ import com.congthuc.rabbitmqdemo.config.RabbitConfig;
+ import com.congthuc.rabbitmqdemo.dto.Letter;
+-import com.congthuc.rabbitmqdemo.dto.Order;
+ import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+Index: src/main/java/com/congthuc/rabbitmqdemo/sender/OrderMessageSender.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/congthuc/rabbitmqdemo/sender/OrderMessageSender.java	(revision ba2c07d6a7f7f4e185f8e13b0a66440adfc3594c)
++++ src/main/java/com/congthuc/rabbitmqdemo/sender/OrderMessageSender.java	(date 1557486115304)
+@@ -36,7 +36,9 @@
+                                 .withBody(orderJson.getBytes())
+                                 .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                                 .build();
+-            this.rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_ORDERS, message);
++
++            this.rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_ORDERS, RabbitConfig.QUEUE_ORDERS_ROUTE_KEY,
++                    message);
+         } catch (JsonProcessingException e) {
+             e.printStackTrace();
+         }
+Index: src/main/java/com/congthuc/rabbitmqdemo/sender/LetterMessageSender.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/congthuc/rabbitmqdemo/sender/LetterMessageSender.java	(revision ba2c07d6a7f7f4e185f8e13b0a66440adfc3594c)
++++ src/main/java/com/congthuc/rabbitmqdemo/sender/LetterMessageSender.java	(date 1557487066768)
+@@ -2,7 +2,6 @@
+ 
+ import com.congthuc.rabbitmqdemo.config.RabbitConfig;
+ import com.congthuc.rabbitmqdemo.dto.Letter;
+-import com.congthuc.rabbitmqdemo.dto.Order;
+ import com.fasterxml.jackson.core.JsonProcessingException;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import org.springframework.amqp.core.Message;
+@@ -37,7 +36,9 @@
+                     .withBody(orderJson.getBytes())
+                     .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+                     .build();
+-            this.rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_LETTERS, message);
++
++            this.rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_LETTERS, RabbitConfig.QUEUE_LETTERS_ROUTE_KEY,
++                    message);
+         } catch (JsonProcessingException e) {
+             e.printStackTrace();
+         }
+Index: src/main/java/com/congthuc/rabbitmqdemo/config/RabbitConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/com/congthuc/rabbitmqdemo/config/RabbitConfig.java	(revision ba2c07d6a7f7f4e185f8e13b0a66440adfc3594c)
++++ src/main/java/com/congthuc/rabbitmqdemo/config/RabbitConfig.java	(date 1557483721507)
+@@ -23,11 +23,13 @@
+ @ComponentScan
+ public class RabbitConfig implements RabbitListenerConfigurer {
+ 
+-    public static final String QUEUE_ORDERS = "orders-queue";
+     public static final String EXCHANGE_ORDERS = "orders-exchange";
++    public static final String QUEUE_ORDERS = "orders-queue";
++    public static final String QUEUE_ORDERS_ROUTE_KEY = "x-orders-queue";
+ 
+-    public static final String QUEUE_LETTERS = "letters-queue";
+     public static final String EXCHANGE_LETTERS = "letters-exchange";
++    public static final String QUEUE_LETTERS = "letters-queue";
++    public static final String QUEUE_LETTERS_ROUTE_KEY = "x-letters-queue";
+ 
+     public static final String QUEUE_DEAD_ORDERS = "dead-orders-queue";
+     public static final String QUEUE_DEAD_LETTERS = "dead-letter-queue";
+@@ -64,22 +66,22 @@
+ 
+     @Bean
+     Exchange ordersExchange() {
+-        return ExchangeBuilder.topicExchange(EXCHANGE_ORDERS).build();
++        return ExchangeBuilder.directExchange(EXCHANGE_ORDERS).build();
+     }
+ 
+     @Bean
+     Exchange lettersExchange() {
+-        return ExchangeBuilder.topicExchange(EXCHANGE_LETTERS).build();
++        return ExchangeBuilder.directExchange(EXCHANGE_LETTERS).build();
+     }
+ 
+     @Bean
+-    Binding ordersBinding(Queue ordersQueue, TopicExchange ordersExchange) {
+-        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(QUEUE_ORDERS);
++    Binding ordersBinding(Queue ordersQueue, DirectExchange ordersExchange) {
++        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(QUEUE_ORDERS_ROUTE_KEY);
+     }
+ 
+     @Bean
+-    Binding lettersBinding(Queue lettersQueue, TopicExchange lettersExchange) {
+-        return BindingBuilder.bind(lettersQueue).to(lettersExchange).with(QUEUE_LETTERS);
++    Binding lettersBinding(Queue lettersQueue, DirectExchange lettersExchange) {
++        return BindingBuilder.bind(lettersQueue).to(lettersExchange).with(QUEUE_LETTERS_ROUTE_KEY);
+     }
+ 
+     @Bean
