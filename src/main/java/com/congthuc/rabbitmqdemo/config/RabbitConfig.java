@@ -34,6 +34,33 @@ public class RabbitConfig implements RabbitListenerConfigurer {
     public static final String QUEUE_DEAD_ORDERS = "dead-orders-queue";
     public static final String QUEUE_DEAD_LETTERS = "dead-letter-queue";
 
+    public static final String EXCHANGE_NOTIFICATION = "notifications-exchange";
+
+    // queue notification for all employee in Netc VN
+    public static final String QUEUE_NOTIFICATION_NETC_VN_ALL = "notification-all-netc-vn-queue";
+    public static final String QUEUE_NOTIFICATION_NETC_VN_ALL_ROUTE_KEY = "netc.vn.*";
+
+    // queue notification for all manager in Netc VN
+    public static final String QUEUE_NOTIFICATION_NETC_VN_MANAGER = "notification-manager-netc-vn-queue";
+    public static final String QUEUE_NOTIFICATION_NETC_VN_MANAGER_ROUTE_KEY = "netc.vn.manager.#";
+
+    // queue notification for all consultant in Netc VN
+    public static final String QUEUE_NOTIFICATION_NETC_VN_CONSULTANT = "notification-consultant-netc-vn-queue";
+    public static final String QUEUE_NOTIFICATION_NETC_VN_CONSULTANT_ROUTE_KEY = "netc.vn.consultant.#";
+
+    // queue notification for all dev-ops in Netc VN
+    public static final String QUEUE_NOTIFICATION_NETC_VN_DEVOPS = "notification-devops-netc-vn-queue";
+    public static final String QUEUE_NOTIFICATION_NETC_VN_DEVOPS_ROUTE_KEY = "netc.vn.dev-ops.#";
+
+    public static final String QUEUE_DEAD_NOTIFICATIONS = "dead-notifications-queue";
+
+
+    // all the beans for order message
+    @Bean
+    Exchange ordersExchange() {
+        return ExchangeBuilder.topicExchange(EXCHANGE_ORDERS).build();
+    }
+
     @Bean
     Queue ordersQueue() {
         return QueueBuilder.durable(QUEUE_ORDERS)
@@ -42,6 +69,23 @@ public class RabbitConfig implements RabbitListenerConfigurer {
                 .withArgument("x-dead-letter-routing-key", QUEUE_DEAD_ORDERS)
                 .withArgument("x-message-ttl", 60000)
                 .build();
+    }
+
+    @Bean
+    Binding ordersBinding(Queue ordersQueue, Exchange ordersExchange) {
+        return BindingBuilder.bind(ordersQueue).to((TopicExchange)ordersExchange).with(QUEUE_ORDERS_ROUTE_KEY);
+    }
+
+    @Bean
+    Queue deadOrdersQueue() {
+        return QueueBuilder.durable(QUEUE_DEAD_ORDERS).build();
+    }
+
+
+    // all the beans for letter message
+    @Bean
+    Exchange lettersExchange() {
+        return ExchangeBuilder.topicExchange(EXCHANGE_LETTERS).build();
     }
 
     @Bean
@@ -55,8 +99,8 @@ public class RabbitConfig implements RabbitListenerConfigurer {
     }
 
     @Bean
-    Queue deadOrdersQueue() {
-        return QueueBuilder.durable(QUEUE_DEAD_ORDERS).build();
+    Binding lettersBinding(Queue lettersQueue, Exchange lettersExchange) {
+        return BindingBuilder.bind(lettersQueue).to((TopicExchange)lettersExchange).with(QUEUE_LETTERS_ROUTE_KEY);
     }
 
     @Bean
@@ -64,24 +108,71 @@ public class RabbitConfig implements RabbitListenerConfigurer {
         return QueueBuilder.durable(QUEUE_DEAD_LETTERS).build();
     }
 
+    // all the beans for notification message
     @Bean
-    Exchange ordersExchange() {
-        return ExchangeBuilder.topicExchange(EXCHANGE_ORDERS).build();
+    Exchange notificationsExchange() {
+        return ExchangeBuilder.topicExchange(EXCHANGE_NOTIFICATION).build();
     }
 
     @Bean
-    Exchange lettersExchange() {
-        return ExchangeBuilder.topicExchange(EXCHANGE_LETTERS).build();
+    Queue deadNotificationsQueue() {
+        return QueueBuilder.durable(QUEUE_DEAD_NOTIFICATIONS).build();
     }
 
     @Bean
-    Binding ordersBinding(Queue ordersQueue, TopicExchange ordersExchange) {
-        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(QUEUE_ORDERS_ROUTE_KEY);
+    Queue allEmployeesQueue() {
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_NETC_VN_ALL)
+                .withArgument("x-max-length", 5000)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_DEAD_NOTIFICATIONS)
+                .withArgument("x-message-ttl", 60 * 60 * 1000)
+                .build();
+    }
+    @Bean
+    Binding allEmployeesBinding(Queue allEmployeesQueue, Exchange notificationsExchange) {
+        return BindingBuilder.bind(allEmployeesQueue).to((TopicExchange)notificationsExchange).with(QUEUE_NOTIFICATION_NETC_VN_ALL_ROUTE_KEY);
     }
 
     @Bean
-    Binding lettersBinding(Queue lettersQueue, TopicExchange lettersExchange) {
-        return BindingBuilder.bind(lettersQueue).to(lettersExchange).with(QUEUE_LETTERS_ROUTE_KEY);
+    Queue managersQueue() {
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_NETC_VN_MANAGER)
+                .withArgument("x-max-length", 5000)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_DEAD_NOTIFICATIONS)
+                .withArgument("x-message-ttl", 60 * 60 * 1000)
+                .build();
+    }
+    @Bean
+    Binding managersBinding(Queue managersQueue, Exchange notificationsExchange) {
+        return BindingBuilder.bind(managersQueue).to((TopicExchange)notificationsExchange).with(QUEUE_NOTIFICATION_NETC_VN_MANAGER_ROUTE_KEY);
+    }
+
+    @Bean
+    Queue consultantsQueue() {
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_NETC_VN_CONSULTANT)
+                .withArgument("x-max-length", 5000)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_DEAD_NOTIFICATIONS)
+                .withArgument("x-message-ttl", 60 * 60 * 1000)
+                .build();
+    }
+    @Bean
+    Binding consultantsBinding(Queue consultantsQueue, Exchange notificationsExchange) {
+        return BindingBuilder.bind(consultantsQueue).to((TopicExchange)notificationsExchange).with(QUEUE_NOTIFICATION_NETC_VN_CONSULTANT_ROUTE_KEY);
+    }
+
+    @Bean
+    Queue devopsesQueue() {
+        return QueueBuilder.durable(QUEUE_NOTIFICATION_NETC_VN_DEVOPS)
+                .withArgument("x-max-length", 5000)
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_DEAD_NOTIFICATIONS)
+                .withArgument("x-message-ttl", 60 * 60 * 1000)
+                .build();
+    }
+    @Bean
+    Binding devopsesBinding(Queue devopsesQueue, Exchange notificationsExchange) {
+        return BindingBuilder.bind(devopsesQueue).to((TopicExchange)notificationsExchange).with(QUEUE_NOTIFICATION_NETC_VN_DEVOPS_ROUTE_KEY);
     }
 
     @Bean
