@@ -23,11 +23,13 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 @ComponentScan
 public class RabbitConfig implements RabbitListenerConfigurer {
 
-    public static final String QUEUE_ORDERS = "orders-queue";
     public static final String EXCHANGE_ORDERS = "orders-exchange";
+    public static final String QUEUE_ORDERS = "orders-queue";
+    public static final String QUEUE_ORDERS_ROUTE_KEY = "x-orders-queue";
 
-    public static final String QUEUE_LETTERS = "letters-queue";
     public static final String EXCHANGE_LETTERS = "letters-exchange";
+    public static final String QUEUE_LETTERS = "letters-queue";
+    public static final String QUEUE_LETTERS_ROUTE_KEY = "x-letters-queue";
 
     public static final String QUEUE_DEAD_ORDERS = "dead-orders-queue";
     public static final String QUEUE_DEAD_LETTERS = "dead-letter-queue";
@@ -74,12 +76,12 @@ public class RabbitConfig implements RabbitListenerConfigurer {
 
     @Bean
     Binding ordersBinding(Queue ordersQueue, TopicExchange ordersExchange) {
-        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(QUEUE_ORDERS);
+        return BindingBuilder.bind(ordersQueue).to(ordersExchange).with(QUEUE_ORDERS_ROUTE_KEY);
     }
 
     @Bean
     Binding lettersBinding(Queue lettersQueue, TopicExchange lettersExchange) {
-        return BindingBuilder.bind(lettersQueue).to(lettersExchange).with(QUEUE_LETTERS);
+        return BindingBuilder.bind(lettersQueue).to(lettersExchange).with(QUEUE_LETTERS_ROUTE_KEY);
     }
 
     @Bean
