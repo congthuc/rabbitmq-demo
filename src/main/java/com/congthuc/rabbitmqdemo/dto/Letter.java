@@ -20,6 +20,13 @@ public class Letter implements Serializable {
         this.id = UUID.randomUUID().toString();
     }
 
+    public Letter(String id, String subject, String body, List <String> receivers) {
+        this.id = id;
+        this.subject = subject;
+        this.body = body;
+        this.receivers = receivers;
+    }
+
     @Override
     public String toString() {
         return "Letter{" +

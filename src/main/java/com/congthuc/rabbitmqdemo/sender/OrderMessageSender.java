@@ -36,7 +36,7 @@ public class OrderMessageSender {
                                 .withBody(orderJson.getBytes())
                                 .setContentType(MessageProperties.CONTENT_TYPE_JSON)
                                 .build();
-            this.rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_ORDERS, message);
+            this.rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_ORDERS, RabbitConfig.QUEUE_ORDERS_ROUTE_KEY, message);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

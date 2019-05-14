@@ -37,7 +37,7 @@ public class LetterMessageSender {
                     .withBody(orderJson.getBytes())
                     .setContentType(MessageProperties.CONTENT_TYPE_JSON)
                     .build();
-            this.rabbitTemplate.convertAndSend(RabbitConfig.QUEUE_LETTERS, message);
+            this.rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_LETTERS, RabbitConfig.QUEUE_LETTERS_ROUTE_KEY, message);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
