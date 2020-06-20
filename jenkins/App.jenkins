@@ -4,6 +4,7 @@ pipeline {
         stage('build') {
             steps {
                 println "hello Thuc"
+                mvn clean
             }
         }
     }
