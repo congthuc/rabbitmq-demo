@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('build') {
                 steps {
-                    withMaven(maven : 'apache-maven-3.6.1') {
+                    withMaven(maven : 'maven_default') {
                         bat'mvn clean compile'
                     }
                 }
