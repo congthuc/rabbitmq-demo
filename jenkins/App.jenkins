@@ -2,11 +2,8 @@ pipeline {
     agent any
     stages {
         stage('build') {
-                steps {
-                    withMaven(maven : 'maven_default') {
-                        bat'mvn clean compile'
-                    }
-                }
+            steps {
+                sh 'mvn clean compile'
             }
         }
     }
