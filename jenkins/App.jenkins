@@ -13,11 +13,15 @@ pipeline {
             steps {
                 bat 'mvn clean compile'
             }
-        }
-        stage('test') {
             steps {
-                bat 'echo test pct'
+                bat 'mvn -Dmaven.test.failure.ignore=true install'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/**/*.xml'
+                }
             }
         }
+    
     }
 }
